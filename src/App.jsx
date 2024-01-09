@@ -4,12 +4,10 @@ import { Movies } from "./components/Movies";
 import { useMovies } from "./hooks/useMovies";
 import { useEffect, useRef } from "react";
 
-
-
-function useSearch () {
-  const [search, updateSearch] = useState("")
-  const [error, setError] = useState(null)
-  const isFirstInput = useRef(true)
+function useSearch() {
+  const [search, updateSearch] = useState("");
+  const [error, setError] = useState(null);
+  const isFirstInput = useRef(true);
 
   useEffect(() => {
     //if empty first time dont show error
@@ -37,15 +35,17 @@ function useSearch () {
     return;
   }, [search]);
 
-  return {search, updateSearch, error}
+  return { search, updateSearch, error };
 }
 
-
 function App() {
+  const [sort, setSort] = useState(false);
   const { search, updateSearch, error } = useSearch();
-    const { movies, getMovies } = useMovies({search});
+  const { movies, getMovies, loading } = useMovies({ search, sort });
 
-  
+  const handleSort = () => {
+    setSort(!sort);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,10 +58,10 @@ function App() {
 
   //set the value of the state as the change in the input field of the form, this way its slower because it searches on every change of the state, so on EVERY single keyboard tap of the user
   const handleChange = (e) => {
-      updateSearch(e.target.value)
-      
-      //this is from the useEffect. the code would work too, but here we are using the state, that its async, so the value could be stored not in time. To fix this we could declare a new variable, for example, newQuery and not the state itself
-      /* if (query === "") {
+    updateSearch(e.target.value);
+
+    //this is from the useEffect. the code would work too, but here we are using the state, that its async, so the value could be stored not in time. To fix this we could declare a new variable, for example, newQuery and not the state itself
+    /* if (query === "") {
         setError("No searching parameters");
         return;
       }
@@ -72,11 +72,9 @@ function App() {
         setError("Only numbers not allowed");
       }
       setError(null); */
-  }
- 
+  };
 
   //controlled way of deal with form
-  
 
   return (
     <div className="page">
@@ -91,14 +89,13 @@ function App() {
             type="text"
             placeholder="The Matrix, Pulp Fiction..."
           />
+          <input type="checkbox" onChange={handleSort} checked={sort} />
           <button type="submit">Search</button>
         </form>
-        {error && <p style={{color: 'red'}}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </header>
 
-      <main>
-        <Movies movies={movies} />
-      </main>
+      <main>{loading ? <p>Loading...</p> : <Movies movies={movies} />}</main>
     </div>
   );
 }
